@@ -1,61 +1,117 @@
-const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
+const mongoose = require("mongoose");
 
-// Connection URL
-const url = 'mongodb://localhost:27017';
+mongoose.connect("mongodb://localhost:27017/fruitsDB");
 
-// Database Name
-const dbName = 'fruitsDB';
+// FRUITS COLLECTION
 
-// Create a new MongoClient
-const client = new MongoClient(url);
+const fruitSchema = new mongoose.Schema ({
+    name: {
+        type: String,
+        required: [true, "Name is required!"]
+    },
+    rating: {
+        type: Number,
+        min: 1,
+        max: 10
+    },
+    review: String
+});
 
-// Use connect method to connect to the Server
-client.connect(function (err) {
-    assert.equal(null, err);
-    console.log("Connected successfully to server");
+const Fruit = mongoose.model("Fruit", fruitSchema);
 
-    const db = client.db(dbName);
+// INSERT FRUITS IN BULK
 
-    findDocuments(db, function () {
-        client.close();
-    });
+// const kiwi = new Fruit({
+//     name: "Kiwi",
+//     score: 10,
+//     review: "The best fruit!"
+// });
+
+// const orange = new Fruit ({
+//     name: "Orange",
+//     score: 4,
+//     review: "Too sour for me"
+// });
+
+// const banana = new Fruit ({
+//     name: "Banana",
+//     score: 3,
+//     review: "Wierd texture"
+// });
+
+// Fruit.insertMany([kiwi, orange, banana], function (err) {
+//     if (err) {
+//         console.log(err);
+//     } else {
+//         console.log("Successfully saved all the fruits to fruitsDB");
+//     }
+// });
+
+// fruit.save();
+
+// PEOPLE COLLECTION
+
+const personSchema = new mongoose.Schema ({
+    name: String,
+    age: Number,
+    favouriteFruit: fruitSchema   //-created relationship to fruit
+});
+
+const Person = mongoose.model("Person", personSchema);
+
+const pinapple = new Fruit({
+    name: "Pinapple",
+    score: 9,
+    review: "Great fruit."
 })
 
-const insertDocuments = function (db, callback) {
-    // Get the documents collection
-    const collection = db.collection('fruits');
-    // Insert some documents
-    collection.insertMany([
-       {
-           name: "Apple",
-           score: 8,
-           review: "Great fruit"
-       },
-       {
-           name: "Orange",
-           score: 6,
-           review: "Kinda sour"
-       }, {
-           name: "Banana",
-           score: 9,
-           review: "Great stuff!"
-       }
-    ], function (err, result) {
-        assert.equal(err, null);
-        console.log("Inserted 3 documents into the collection");
-        callback(result);
-    });
-}
+// pinapple.save();
 
-const findDocuments = function (db, callback) {
-    // Get documents collection
-    const collection = db.collection('fruits');
-    // Find some documents
-    collection.find({}).toArray(function (err, fruits) {
-        assert.equal(err, null);
-        console.log("Found the following records");
-        console.log(fruits);
-        callback(fruits);
-    })
-}
+const lemon = new Fruit({
+    name: "Lemon",
+    score: 10,
+    review: "Healthy fruit."
+})
+
+// lemon.save();
+
+const mango = new Fruit ({
+    name: "Mango",
+    score: 6,
+    review: "Decent fruit."
+})
+
+// mango.save();
+
+const person = new Person({
+    name: "John",
+    age: 37,
+    favouriteFruit: lemon
+});
+
+// person.save();
+
+// TO ADD FAVOURITE FRUIT
+
+// Person.updateOne({name: "John"}), {favouriteFruit: mango}, function (err) {
+//     if (err) {
+//         console.log(err);
+//     } else {
+//         console.log("Successfully updated the document");
+//     }
+// }
+
+// TO FIND A SPECIFIC FRUIT
+
+Fruit.find(function (err, fruits) {
+    if (err) {
+        console.log(err);
+    } else {
+        // mongoose.connection.close();  //- to close connection after forEach loop is finished
+       fruits.forEach(function(fruit) {
+           console.log(fruit.name);
+       });
+    }  
+});
+
+// err - error
